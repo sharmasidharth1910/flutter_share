@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool isAuth = false;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   PageController pageController;
   int pageIndex = 0;
 
@@ -57,12 +61,13 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  handleSignIn(GoogleSignInAccount account) {
+  handleSignIn(GoogleSignInAccount account) async {
     if (account != null) {
-      createUserInFirestore();
+      await createUserInFirestore();
       setState(() {
         isAuth = true;
       });
+      configurePushNotifications();
     } else {
       setState(() {
         isAuth = false;
@@ -70,7 +75,48 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Future<void> createUserInFirestore() async {
+  configurePushNotifications() {
+    final GoogleSignInAccount user = googleSignIn.currentUser;
+    if (Platform.isIOS) getiOSPermission();
+
+    _firebaseMessaging.getToken().then((token) {
+      print("Firebase messaging token: $token\n");
+      usersRef.document(user.id).updateData({
+        "androidNotificationToken": token,
+      });
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("Message: $message\n");
+        final String recipientId = message['data']['recipient'];
+        final String body = message['notification']['body'];
+        if (recipientId == user.id) {
+          print("Notification shown");
+          SnackBar snackBar = SnackBar(
+              content: Text(
+                body,
+                overflow: TextOverflow.ellipsis,
+              ));
+          _scaffoldKey.currentState.showSnackBar(snackBar);
+        }
+        print("Notification not received");
+      },
+    );
+  }
+
+  getiOSPermission() {
+    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(
+      alert: true,
+      sound: true,
+      badge: true,
+    ));
+    _firebaseMessaging.onIosSettingsRegistered.listen((settings) {
+      print("Settings registered: $settings");
+    });
+  }
+
+  createUserInFirestore() async {
     // 1)check if user exists in users collection in database (according to the user id)
     final GoogleSignInAccount user = googleSignIn.currentUser;
     DocumentSnapshot doc = await usersRef.document(user.id).get();
@@ -82,14 +128,20 @@ class _HomeState extends State<Home> {
         MaterialPageRoute(builder: (context) => CreateAccount()),
       );
       usersRef.document(user.id).setData({
-        "id" : user.id,
-        "username" : username,
-        "photoUrl" : user.photoUrl,
-        "email" : user.email,
-        "displayName" : user.displayName,
-        "bio" : "",
-        "timeStamp" : timeStamp,
+        "id": user.id,
+        "username": username,
+        "photoUrl": user.photoUrl,
+        "email": user.email,
+        "displayName": user.displayName,
+        "bio": "",
+        "timeStamp": timeStamp,
       });
+      //make the new user their own follower to include their post in timeline
+      await followersRef
+          .document(user.id)
+          .collection("userFollowers")
+          .document(user.id)
+          .setData({});
       doc = await usersRef.document(user.id).get();
     }
 
@@ -121,6 +173,7 @@ class _HomeState extends State<Home> {
 
   Scaffold buildAuthScreen() {
     return Scaffold(
+      key: _scaffoldKey,
       body: PageView(
         children: <Widget>[
           Timeline(currentUser: currentUser),

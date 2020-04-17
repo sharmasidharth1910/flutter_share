@@ -221,7 +221,7 @@ class _ProfileState extends State<Profile> {
       "username": currentUser.username,
       "userId": currentUserId,
       "userProfileImg": currentUser.photoUrl,
-      "timestamp": timeStamp,
+      "timeStamp": timeStamp,
     });
   }
 

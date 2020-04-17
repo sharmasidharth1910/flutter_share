@@ -15,6 +15,9 @@ class PostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("PostId: $postId");
+    print("userId: $userId");
+    print("UploadId: ${currentUser.id}");
     return FutureBuilder(
       future: postsRef
           .document(userId)
@@ -24,23 +27,24 @@ class PostScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
+        } else {
+          Post post = Post.fromDocument(snapshot.data);
+          return Center(
+            child: Scaffold(
+              appBar: header(
+                context,
+                titleText: post.description,
+              ),
+              body: ListView(
+                children: <Widget>[
+                  Container(
+                    child: post,
+                  ),
+                ],
+              ),
+            ),
+          );
         }
-        Post post = Post.fromDocument(snapshot.data);
-        return Center(
-          child: Scaffold(
-            appBar: header(
-              context,
-              titleText: post.description,
-            ),
-            body: ListView(
-              children: <Widget>[
-                Container(
-                  child: post,
-                ),
-              ],
-            ),
-          ),
-        );
       },
     );
   }

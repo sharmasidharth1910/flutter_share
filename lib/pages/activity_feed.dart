@@ -18,7 +18,7 @@ class _ActivityFeedState extends State<ActivityFeed> {
     QuerySnapshot snapshot = await activityFeedRef
         .document(currentUser.id)
         .collection("feedItems")
-        .orderBy("timestamp", descending: true)
+        .orderBy("timeStamp", descending: true)
         .limit(50)
         .getDocuments();
     List<ActivityFeedItem> feedItems = [];
@@ -26,6 +26,11 @@ class _ActivityFeedState extends State<ActivityFeed> {
       feedItems.add(ActivityFeedItem.fromDocument(doc));
     });
     return feedItems;
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -37,7 +42,7 @@ class _ActivityFeedState extends State<ActivityFeed> {
           future: getActivityFeed(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              circularProgress();
+              return circularProgress();
             }
             return ListView(
               children: snapshot.data,
@@ -81,7 +86,7 @@ class ActivityFeedItem extends StatelessWidget {
       type: doc['type'],
       userProfileImg: doc['userProfileImg'],
       mediaUrl: doc['mediaUrl'],
-      timestamp: doc['timestamp'],
+      timestamp: doc['timeStamp'],
       username: doc['username'],
     );
   }
@@ -92,7 +97,7 @@ class ActivityFeedItem extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => PostScreen(
           postId: postId,
-          userId: userId,
+          userId: currentUser.id,
         ),
       ),
     );

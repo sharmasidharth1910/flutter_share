@@ -45,7 +45,7 @@ class _TimelineState extends State<Timeline> {
     QuerySnapshot snapshot = await timelineRef
         .document(widget.currentUser.id)
         .collection("timelinePosts")
-        .orderBy("timestamp", descending: true)
+        .orderBy("timeStamp", descending: true)
         .getDocuments();
     List<Post> posts =
         snapshot.documents.map((doc) => Post.fromDocument(doc)).toList();
@@ -57,7 +57,7 @@ class _TimelineState extends State<Timeline> {
   buildUsersToFollow() {
     return StreamBuilder(
         stream: usersRef
-            .orderBy('timestamp', descending: true)
+            .orderBy('timeStamp', descending: true)
             .limit(30)
             .snapshots(),
         builder: (context, snapshot) {
@@ -74,12 +74,50 @@ class _TimelineState extends State<Timeline> {
               return;
             } else if (isFollowingUser) {
               return;
-            }
-            else {
+            } else {
               UserResult userResult = UserResult(user);
               userResults.add(userResult);
             }
           });
+          return Container(
+            color: Theme
+                .of(context)
+                .accentColor,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.person_add,
+                        color: Theme
+                            .of(context)
+                            .primaryColor,
+                        size: 30.0,
+                      ),
+                      SizedBox(
+                        width: 8.0,
+                      ),
+                      Text(
+                        "Users to follow",
+                        style: TextStyle(
+                          color: Theme
+                              .of(context)
+                              .primaryColor,
+                          fontSize: 30.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: userResults,
+                ),
+              ],
+            ),
+          );
         });
   }
 

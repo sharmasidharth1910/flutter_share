@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:animator/animator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -94,7 +93,7 @@ class _PostState extends State<Post> {
     this.username,
   });
 
-  Widget buildPostHeader() {
+  buildPostHeader() {
     return FutureBuilder(
       future: usersRef.document(ownerId).get(),
       builder: (context, snapshot) {
@@ -261,7 +260,7 @@ class _PostState extends State<Post> {
         "userProfileImg": currentUser.photoUrl,
         "postId": postId,
         "mediaUrl": mediaUrl,
-        "timestamp": timeStamp,
+        "timeStamp": timeStamp,
       });
     }
   }
@@ -282,7 +281,7 @@ class _PostState extends State<Post> {
     }
   }
 
-  Widget buildPostImage() {
+  buildPostImage() {
     return GestureDetector(
       onDoubleTap: handleLikePost,
       child: Stack(
@@ -313,7 +312,7 @@ class _PostState extends State<Post> {
     );
   }
 
-  Widget buildPostFooter() {
+  buildPostFooter() {
     return Column(
       children: <Widget>[
         Row(

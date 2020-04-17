@@ -86,7 +86,10 @@ class _CreateAccountState extends State<CreateAccount> {
                       right: 20.0,
                     ),
                     height: 50.0,
-                    width: double.infinity,
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width - 30,
                     decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(7.0),
