@@ -23,6 +23,7 @@ final postsRef = Firestore.instance.collection("posts");
 final timelineRef = Firestore.instance.collection("timeline");
 final commentsRef = Firestore.instance.collection("comments");
 final usersRef = Firestore.instance.collection("users");
+final chatsRef = Firestore.instance.collection("chats");
 User currentUser;
 
 class Home extends StatefulWidget {
@@ -123,16 +124,16 @@ class _HomeState extends State<Home> {
 
     // 2)If the user doesn't exist, then we want to take them to the create account page
     if (!doc.exists) {
-      final username = await Navigator.push(
+      final String username = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => CreateAccount()),
       );
       usersRef.document(user.id).setData({
         "id": user.id,
-        "username": username,
+        "username": username.toLowerCase(),
         "photoUrl": user.photoUrl,
         "email": user.email,
-        "displayName": user.displayName,
+        "displayName": user.displayName.toLowerCase(),
         "bio": "",
         "timeStamp": timeStamp,
       });

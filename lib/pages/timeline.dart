@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/models/user.dart';
+import 'package:flutter_share/pages/chat_list.dart';
 import 'package:flutter_share/pages/search.dart';
 import 'package:flutter_share/widgets/header.dart';
 import 'package:flutter_share/pages/home.dart';
@@ -133,10 +134,20 @@ class _TimelineState extends State<Timeline> {
     }
   }
 
+  void onPressed() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatList(),
+      ),
+    );
+  }
+
   @override
   Widget build(context) {
     return Scaffold(
-      appBar: header(context, isAppTitle: true),
+      appBar:
+      header(context, isAppTitle: true, chat: true, onPressed: onPressed),
       body: RefreshIndicator(
         onRefresh: () => getTimeline(),
         child: buildTimeline(),
